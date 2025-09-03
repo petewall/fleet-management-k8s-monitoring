@@ -1,0 +1,3 @@
+kubeconfig.yaml
+deployments/remote-config-credentials.yaml
+pipelines/fleet-management.yaml

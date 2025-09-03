@@ -1,0 +1,53 @@
+---
+apiVersion: collectors.grafana.com/v1alpha1
+kind: Alloy
+metadata:
+  name: alloy-logs
+  namespace: monitoring
+  annotations:
+    helm.sdk.operatorframework.io/uninstall-wait: "true"
+spec:
+  controller:
+    type: daemonset
+  alloy:
+    mounts:
+      varlog: true
+    extraEnv:
+      - name: GCLOUD_RW_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: remote-config-credentials
+            key: password
+      - name: CLUSTER_NAME
+        value: fm-test-cluster
+      - name: NAMESPACE
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.namespace
+      - name: NODE_NAME
+        valueFrom:
+          fieldRef:
+            fieldPath: spec.nodeName
+
+    configMap:
+      content: |
+        remote.kubernetes.secret "remote_config_credentials" {
+          name = "remote-config-credentials"
+          namespace = sys.env("NAMESPACE")
+        }
+        
+        remotecfg {
+          id = string.format("%s-%s-%s-logs", sys.env("CLUSTER_NAME"), sys.env("NAMESPACE"), sys.env("NODE_NAME"))
+          url = convert.nonsensitive(remote.kubernetes.secret.remote_config_credentials.data["url"])
+          basic_auth {
+            username = convert.nonsensitive(remote.kubernetes.secret.remote_config_credentials.data["username"])
+            password = remote.kubernetes.secret.remote_config_credentials.data["password"]
+          }
+          poll_frequency = "1m"
+          attributes = {
+            "platform" = "kubernetes",
+            "cluster" = sys.env("CLUSTER_NAME"),
+            "namespace" = sys.env("NAMESPACE"),
+            "purpose" = "logs",
+          }
+        }
