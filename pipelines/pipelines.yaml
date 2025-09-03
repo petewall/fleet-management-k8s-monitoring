@@ -4,8 +4,22 @@ pipelines:
     matchers:
       - platform=kubernetes
       - purpose=metrics
+
   - name: cadvisor
     file: cadvisor.alloy
     matchers:
       - platform=kubernetes
       - purpose=metrics
+
+  - name: kube_state_metrics
+    file: kube-state-metrics.alloy
+    matchers:
+      - platform=kubernetes
+      - purpose=metrics
+
+  - name: node_exporter
+    file: node-exporter.alloy
+    matchers:
+      - platform=kubernetes
+      - purpose=metrics
+

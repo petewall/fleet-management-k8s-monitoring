@@ -2,6 +2,8 @@
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
+pipelineNameToSync=$1
+
 fleetManagementFile="${SCRIPT_DIR}/fleet-management.yaml"
 if [ ! -f "${fleetManagementFile}" ]; then
   echo "${fleetManagementFile} not found!"
@@ -22,6 +24,9 @@ fi
 numPipelines=$(yq eval '.pipelines | length' "${pipelinesFile}")
 for i in $(seq 0 $((numPipelines - 1))); do
   pipelineName=$(yq eval ".pipelines[$i].name" "${pipelinesFile}")
+  if [ -n "${pipelineNameToSync}" ] && [ "${pipelineName}" != "${pipelineNameToSync}" ]; then
+    continue
+  fi
   echo "Syncing pipeline: ${pipelineName}"
 
   pipelineMatchers=$(yq eval --output-format json --indent 0 ".pipelines[$i].matchers" "${pipelinesFile}")
@@ -45,7 +50,7 @@ for i in $(seq 0 $((numPipelines - 1))); do
     --user "${username}:${password}" \
     --data "${upsertPipelineRequestBody}" \
     "${host}/pipeline.v1.PipelineService/UpsertPipeline" \
-    --show-error --fail
+    --silent --show-error --fail-with-body
 
     sleep 1
 done

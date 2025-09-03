@@ -11,6 +11,12 @@ delete-cluster:
 deploy-alloy-operator: kubeconfig.yaml
 	helm upgrade --install alloy-operator grafana/alloy-operator --namespace monitoring --create-namespace
 
+deploy-kube-state-metrics: kubeconfig.yaml
+	helm upgrade --install kube-state-metrics prometheus-community/kube-state-metrics --namespace monitoring --create-namespace
+
+deploy-node-exporter: kubeconfig.yaml
+	helm upgrade --install node-exporter prometheus-community/prometheus-node-exporter --namespace monitoring --create-namespace
+
 pipelines/fleet-management.yaml:
 	echo "---" > $@
 	echo "host: $(shell op read "op://Lab/Fleet Management Manager Token/website")" >> $@
@@ -26,5 +32,5 @@ deployments/remote-config-credentials.yaml:
 		--from-literal=password="$(shell op read "op://Lab/Fleet Management Cluster Token/password")" \
 		-o yaml --dry-run=client >> $@
 
-deploy: kubeconfig.yaml deploy-alloy-operator deployments/remote-config-credentials.yaml
+deploy: kubeconfig.yaml deploy-alloy-operator deploy-kube-state-metrics deploy-node-exporter deployments/remote-config-credentials.yaml
 	kubectl apply -f deployments

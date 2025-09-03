@@ -1,0 +1,79 @@
+discovery.kubernetes "node_exporter" {
+  role = "pod"
+
+  selectors {
+    role = "pod"
+    label = "app.kubernetes.io/name=prometheus-node-exporter"
+  }
+  namespaces {
+    names = [argument.attributes.value["namespace"]]
+  }
+}
+
+discovery.relabel "node_exporter" {
+  targets = discovery.kubernetes.node_exporter.targets
+
+  // keep only the specified metrics port name, and pods that are Running and ready
+  rule {
+    source_labels = [
+      "__meta_kubernetes_pod_container_port_name",
+      "__meta_kubernetes_pod_container_init",
+      "__meta_kubernetes_pod_phase",
+      "__meta_kubernetes_pod_ready",
+    ]
+    separator = "@"
+    regex = "metrics@false@Running@true"
+    action = "keep"
+  }
+
+  // Set the instance label to the node name
+  rule {
+    source_labels = ["__meta_kubernetes_pod_node_name"]
+    action = "replace"
+    target_label = "instance"
+  }
+}
+
+prometheus.scrape "node_exporter" {
+  targets = discovery.relabel.node_exporter.output
+  job_name = "integrations/node_exporter"
+
+  clustering {
+    enabled = true
+  }
+  forward_to = [prometheus.relabel.node_exporter.receiver]
+}
+
+prometheus.relabel "node_exporter" {
+  rule {
+    source_labels = ["__name__"]
+    regex = "up|scrape_samples_scraped|node_cpu.*|node_exporter_build_info|node_filesystem.*|node_memory.*|node_network_receive_bytes_total|node_network_receive_drop_total|node_network_transmit_bytes_total|node_network_transmit_drop_total|process_cpu_seconds_total|process_resident_memory_bytes"
+    action = "keep"
+  }
+
+  // Drop metrics for ephemeral file systems
+  rule {
+    source_labels = ["__name__", "fstype"]
+    separator = "@"
+    regex = "node_filesystem.*@(ramfs|tmpfs)"
+    action = "drop"
+  }
+
+	forward_to = [prometheus.remote_write.grafana_cloud_metrics.receiver]
+}
+
+prometheus.remote_write "grafana_cloud_metrics" {
+	endpoint {
+		url = "https://prometheus-prod-10-prod-us-central-0.grafana.net/api/prom/push"
+
+		basic_auth {
+			username = "622181"
+			password = sys.env("GCLOUD_RW_API_KEY")
+		}
+
+		write_relabel_config {
+			target_label = "cluster"
+			replacement  = argument.attributes.value["cluster"]
+		}
+	}
+}
