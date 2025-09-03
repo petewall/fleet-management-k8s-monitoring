@@ -1,25 +1,36 @@
 pipelines:
-  - name: kubelet
+  - name: kubernetes_kubelet
     file: kubelet.alloy
     matchers:
       - platform=kubernetes
       - purpose=metrics
 
-  - name: cadvisor
+  - name: kubernetes_cadvisor
     file: cadvisor.alloy
     matchers:
       - platform=kubernetes
       - purpose=metrics
 
-  - name: kube_state_metrics
+  - name: kubernetes_kube_state_metrics
     file: kube-state-metrics.alloy
     matchers:
       - platform=kubernetes
       - purpose=metrics
 
-  - name: node_exporter
+  - name: kubernetes_node_exporter
     file: node-exporter.alloy
     matchers:
       - platform=kubernetes
       - purpose=metrics
 
+  - name: kubernetes_pod_logs
+    file: pod-logs.alloy
+    matchers:
+      - platform=kubernetes
+      - purpose=logs
+
+  - name: kubernetes_cluster_events
+    file: cluster-events.alloy
+    matchers:
+      - platform=kubernetes
+      - purpose=singleton

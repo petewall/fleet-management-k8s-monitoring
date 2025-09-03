@@ -2,8 +2,9 @@
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
-pipelineNameToSync=$1
+pipelineNameToSync="${1}"
 
+set -euo pipefail
 fleetManagementFile="${SCRIPT_DIR}/fleet-management.yaml"
 if [ ! -f "${fleetManagementFile}" ]; then
   echo "${fleetManagementFile} not found!"
@@ -37,8 +38,8 @@ for i in $(seq 0 $((numPipelines - 1))); do
     exit 1
   fi
 
-  upsertPipelineRequestBody=$(
-    jq --null-input \
+  upsertPipelineRequestBody=$(jq \
+      --null-input \
       --arg name "${pipelineName}" \
       --arg contents "$(cat "${pipelineFile}")" \
       --argjson matchers "${pipelineMatchers}" \
@@ -46,11 +47,11 @@ for i in $(seq 0 $((numPipelines - 1))); do
      '.pipeline = {name: $name, contents: $contents, matchers: $matchers, enabled: $enabled}')
 
   curl -X POST \
+    --silent \
     --header "Content-Type: application/json" \
     --user "${username}:${password}" \
     --data "${upsertPipelineRequestBody}" \
-    "${host}/pipeline.v1.PipelineService/UpsertPipeline" \
-    --silent --show-error --fail-with-body
+    "${host}/pipeline.v1.PipelineService/UpsertPipeline"
 
-    sleep 1
+    sleep 0.4  # Stay safely below the 3 requests/second rate limit
 done
