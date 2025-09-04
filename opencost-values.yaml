@@ -1,0 +1,40 @@
+---
+opencost:
+  exporter:
+#    defaultClusterId: Set in the Makefile
+    extraEnv:
+      CURRENT_CLUSTER_ID_FILTER_ENABLED: "true"
+      PROM_CLUSTER_ID_LABEL: cluster
+
+  carbonCost:
+    enabled: false
+
+  cloudCost:
+    enabled: false
+
+  metrics:
+    kubeStateMetrics:
+      emitKsmV1Metrics: false
+      emitKsmV1MetricsOnly: true
+
+  prometheus:
+    existingSecretName: metrics-credentials
+    username_key: username
+    password_key: password
+    external:
+      enabled: true
+  #    url: Set in the Makefile
+    internal:
+      enabled: false
+
+  ui:
+    enabled: false
+
+  nodeSelector:
+    kubernetes.io/os: linux
+
+  tolerations:
+    - key: "kubernetes.io/arch"
+      operator: "Equal"
+      value: "arm64"
+      effect: "NoSchedule"

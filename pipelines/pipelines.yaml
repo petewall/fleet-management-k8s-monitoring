@@ -11,6 +11,12 @@ pipelines:
       - platform=kubernetes
       - purpose=metrics
 
+  - name: kubernetes_kepler
+    file: kepler.alloy
+    matchers:
+      - platform=kubernetes
+      - purpose=metrics
+
   - name: kubernetes_kube_state_metrics
     file: kube-state-metrics.alloy
     matchers:
@@ -22,6 +28,18 @@ pipelines:
     matchers:
       - platform=kubernetes
       - purpose=metrics
+
+  - name: kubernetes_opencost
+    file: opencost.alloy
+    matchers:
+      - platform=kubernetes
+      - purpose=metrics
+
+#  - name: kubernetes_node_logs
+#    file: node-logs.alloy
+#    matchers:
+#      - platform=kubernetes
+#      - purpose=logs
 
   - name: kubernetes_pod_logs
     file: pod-logs.alloy

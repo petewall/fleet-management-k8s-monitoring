@@ -1,0 +1,56 @@
+discovery.kubernetes "opencost" {
+  role = "pod"
+
+  selectors {
+    role = "pod"
+    label = "app.kubernetes.io/name=opencost"
+  }
+  namespaces {
+    names = [sys.env("NAMESPACE")]
+  }
+}
+
+discovery.relabel "opencost" {
+  targets = discovery.kubernetes.opencost.targets
+  rule {
+    source_labels = ["__meta_kubernetes_pod_node_name"]
+    action = "replace"
+    target_label = "instance"
+  }
+}
+
+prometheus.scrape "opencost" {
+  targets      = discovery.relabel.opencost.output
+  job_name     = "integrations/opencost"
+  honor_labels = true
+  clustering {
+    enabled = true
+  }
+  forward_to = [prometheus.relabel.opencost.receiver]
+}
+
+prometheus.relabel "opencost" {
+  rule {
+    source_labels = ["__name__"]
+    regex = "up|scrape_samples_scraped|container_cpu_allocation|container_gpu_allocation|container_memory_allocation_bytes|deployment_match_labels|kubecost_cluster_info|kubecost_cluster_management_cost|kubecost_cluster_memory_working_set_bytes|kubecost_http_requests_total|kubecost_http_response_size_bytes|kubecost_http_response_time_seconds|kubecost_load_balancer_cost|kubecost_network_internet_egress_cost|kubecost_network_region_egress_cost|kubecost_network_zone_egress_cost|kubecost_node_is_spot|node_cpu_hourly_cost|node_gpu_count|node_gpu_hourly_cost|node_ram_hourly_cost|node_total_hourly_cost|opencost_build_info|pod_pvc_allocation|pv_hourly_cost|service_selector_labels|statefulSet_match_labels"
+    action = "keep"
+  }
+
+	forward_to = [prometheus.remote_write.grafana_cloud_metrics.receiver]
+ }
+
+ prometheus.remote_write "grafana_cloud_metrics" {
+ 	endpoint {
+ 		url = "https://prometheus-prod-10-prod-us-central-0.grafana.net/api/prom/push"
+
+ 		basic_auth {
+ 			username = "622181"
+ 			password = sys.env("GCLOUD_RW_API_KEY")
+ 		}
+
+ 		write_relabel_config {
+ 			target_label = "cluster"
+ 			replacement  = sys.env("CLUSTER_NAME")
+ 		}
+ 	}
+}

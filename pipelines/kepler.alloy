@@ -1,0 +1,56 @@
+discovery.kubernetes "kepler" {
+  role = "pod"
+
+  selectors {
+    role = "pod"
+    label = "app.kubernetes.io/name=kepler"
+  }
+  namespaces {
+    names = [sys.env("NAMESPACE")]
+  }
+}
+
+discovery.relabel "kepler" {
+  targets = discovery.kubernetes.kepler.targets
+  rule {
+    source_labels = ["__meta_kubernetes_pod_node_name"]
+    action = "replace"
+    target_label = "instance"
+  }
+}
+
+prometheus.scrape "kepler" {
+  targets      = discovery.relabel.kepler.output
+  job_name     = "integrations/kepler"
+  honor_labels = true
+  clustering {
+    enabled = true
+  }
+  forward_to = [prometheus.relabel.kepler.receiver]
+}
+
+prometheus.relabel "kepler" {
+  rule {
+    source_labels = ["__name__"]
+    regex = "up|scrape_samples_scraped|kepler_.*"
+    action = "keep"
+  }
+
+	forward_to = [prometheus.remote_write.grafana_cloud_metrics.receiver]
+ }
+
+prometheus.remote_write "grafana_cloud_metrics" {
+	endpoint {
+		url = "https://prometheus-prod-10-prod-us-central-0.grafana.net/api/prom/push"
+
+		basic_auth {
+			username = "622181"
+			password = sys.env("GCLOUD_RW_API_KEY")
+		}
+
+		write_relabel_config {
+			target_label = "cluster"
+			replacement  = sys.env("CLUSTER_NAME")
+		}
+	}
+}

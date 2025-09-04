@@ -67,7 +67,7 @@ loki.process "cluster_events" {
   }
   stage.static_labels {
     values = {
-      cluster = argument.attributes.value["cluster"],
+      cluster = sys.env("CLUSTER_NAME"),
     }
   }
 

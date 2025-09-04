@@ -6,7 +6,7 @@ discovery.kubernetes "node_exporter" {
     label = "app.kubernetes.io/name=prometheus-node-exporter"
   }
   namespaces {
-    names = [argument.attributes.value["namespace"]]
+    names = [sys.env("NAMESPACE")]
   }
 }
 
@@ -73,7 +73,7 @@ prometheus.remote_write "grafana_cloud_metrics" {
 
 		write_relabel_config {
 			target_label = "cluster"
-			replacement  = argument.attributes.value["cluster"]
+			replacement  = sys.env("CLUSTER_NAME")
 		}
 	}
 }

@@ -19,7 +19,10 @@ spec:
             name: remote-config-credentials
             key: password
       - name: CLUSTER_NAME
-        value: fm-test-cluster
+        valueFrom:
+          configMapKeyRef:
+            name: cluster-config
+            key: clusterName
       - name: NAMESPACE
         valueFrom:
           fieldRef:

@@ -178,7 +178,7 @@ loki.process "pod_logs" {
 
   stage.static_labels {
     values = {
-      cluster = argument.attributes.value["cluster"],
+      cluster = sys.env("CLUSTER_NAME"),
     }
   }
 
