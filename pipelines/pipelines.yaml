@@ -1,4 +1,10 @@
 pipelines:
+  - name: kubernetes_metrics_beyla_surveyor
+    file: beyla-surveyor.alloy
+    matchers:
+      - platform=kubernetes
+      - beyla-surveyor=true
+
   - name: kubernetes_metrics_kubelet
     file: kubelet.alloy
     matchers:

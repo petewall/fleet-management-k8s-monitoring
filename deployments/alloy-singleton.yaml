@@ -47,5 +47,6 @@ spec:
             "cluster" = sys.env("CLUSTER_NAME"),
             "namespace" = sys.env("NAMESPACE"),
             "cluster-events-gatherer" = "true",
+            "beyla-surveyor" = "true",
           }
         }
