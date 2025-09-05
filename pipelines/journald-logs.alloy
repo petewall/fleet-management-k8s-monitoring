@@ -133,6 +133,7 @@ loki.process "journal_logs" {
   // Only keep the labels that are defined in the `keepLabels` list.
   stage.label_keep {
     values = ["__tenant_id__","instance","job","level","name","unit","service_name","source"]
+  }
 
   stage.static_labels {
     values = {
@@ -145,10 +146,10 @@ loki.process "journal_logs" {
 
 loki.write "grafana_cloud_loki" {
 	endpoint {
-		url = "https://logs-prod3.grafana.net/loki/api/v1/push"
+		url = "https://logs-dev-005.grafana-dev.net/loki/api/v1/push"
 
 		basic_auth {
-			username = "310060"
+			username = "154181"
 			password = sys.env("GCLOUD_RW_API_KEY")
 		}
 	}

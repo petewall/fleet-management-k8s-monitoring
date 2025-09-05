@@ -51,6 +51,6 @@ spec:
             "platform" = "kubernetes",
             "cluster" = sys.env("CLUSTER_NAME"),
             "namespace" = sys.env("NAMESPACE"),
-            "purpose" = "logs",
+            "filesystem-pod-logs-gatherer" = "true",
           }
         }

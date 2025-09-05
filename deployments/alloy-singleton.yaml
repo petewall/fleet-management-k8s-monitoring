@@ -46,6 +46,6 @@ spec:
             "platform" = "kubernetes",
             "cluster" = sys.env("CLUSTER_NAME"),
             "namespace" = sys.env("NAMESPACE"),
-            "purpose" = "singleton",
+            "cluster-events-gatherer" = "true",
           }
         }

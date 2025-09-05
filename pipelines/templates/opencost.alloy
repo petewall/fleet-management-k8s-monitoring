@@ -41,10 +41,10 @@ prometheus.relabel "opencost" {
 
  prometheus.remote_write "grafana_cloud_metrics" {
  	endpoint {
-		url = "https://prometheus-dev-01-dev-us-central-0.grafana-dev.net/api/prom/push"
+		url = "{{ .metrics.host }}/api/prom/push"
 
  		basic_auth {
-			username = "28072"
+			username = "{{ .metrics.username }}"
  			password = sys.env("GCLOUD_RW_API_KEY")
  		}
 

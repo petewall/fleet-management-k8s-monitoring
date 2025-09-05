@@ -187,10 +187,10 @@ loki.process "pod_logs" {
 
 loki.write "grafana_cloud_loki" {
 	endpoint {
-		url = "https://logs-prod3.grafana.net/loki/api/v1/push"
+		url = "{{ .logs.host }}/loki/api/v1/push"
 
 		basic_auth {
-			username = "310060"
+			username = "{{ .logs.username }}"
 			password = sys.env("GCLOUD_RW_API_KEY")
 		}
 	}

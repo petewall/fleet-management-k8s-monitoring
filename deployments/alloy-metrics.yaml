@@ -50,6 +50,11 @@ spec:
             "platform" = "kubernetes",
             "cluster" = sys.env("CLUSTER_NAME"),
             "namespace" = sys.env("NAMESPACE"),
-            "purpose" = "metrics",
+            "kubelet-scraper" = "true",
+            "cadvisor-scraper" = "true",
+            "kepler-scraper" = "true",
+            "kube-state-metrics-scraper" = "true",
+            "node-exporter-scraper" = "true",
+            "opencost-scraper" = "true",
           }
         }

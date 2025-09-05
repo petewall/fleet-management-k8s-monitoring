@@ -76,10 +76,10 @@ loki.process "cluster_events" {
 
 loki.write "grafana_cloud_loki" {
 	endpoint {
-		url = "https://logs-dev-005.grafana-dev.net/loki/api/v1/push"
+		url = "{{ .logs.host }}/loki/api/v1/push"
 
 		basic_auth {
-			username = "154181"
+			username = "{{ .logs.username }}"
 			password = sys.env("GCLOUD_RW_API_KEY")
 		}
 	}

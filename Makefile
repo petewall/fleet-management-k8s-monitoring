@@ -76,14 +76,25 @@ deploy: kubeconfig.yaml deploy-alloy-operator deploy-kepler deploy-kube-state-me
 
 
 ##@ Fleet Management Pipelines
+PIPELINE_TEMPLATES := $(wildcard pipelines/templates/*.alloy)
+PIPELINE_FILES := $(patsubst pipelines/templates/%.alloy,pipelines/%.alloy,$(PIPELINE_TEMPLATES))
+
+pipelines/%.alloy: pipelines/templates/%.alloy
+	sed -e "s|{{ .metrics.host }}|$(METRICS_HOST)|g; \
+			s|{{ .metrics.username }}|$(METRICS_USER)|g; \
+			s|{{ .logs.host }}|$(LOGS_HOST)|g; \
+			s|{{ .logs.username }}|$(LOGS_USER)|g" $< > $@
+
 pipelines/fleet-management.yaml: ## Create Fleet Management pipeline configuration
 	echo "---" > $@
 	echo "host: $(FLEET_MANAGEMENT_HOST)" >> $@
 	echo "username: $(FLEET_MANAGEMENT_USER)" >> $@
 	echo "password: $(FLEET_MANAGEMENT_MANAGER_TOKEN)" >> $@
 
-.PHONY: sync-pipelines
-sync-pipelines: pipelines/fleet-management.yaml ## Sync Fleet Management pipelines
+.PHONY: sync-pipelines pipelines
+pipelines: $(PIPELINE_FILES)
+
+sync-pipelines: pipelines/fleet-management.yaml $(PIPELINE_FILES) ## Sync Fleet Management pipelines
 	./pipelines/sync-pipelines.sh
 
 
