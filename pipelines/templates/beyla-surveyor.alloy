@@ -4,7 +4,7 @@ beyla.ebpf "surveyor" {
 		  "application",
 		  "application_process",
 		  "application_span",
-		  "application_service_graph"
+		  "application_service_graph",
 		]
 	}
 
